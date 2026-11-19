@@ -1,0 +1,66 @@
+## =============================================================================
+## Kether_1 — Auditd Forensic Telemetry Ruleset (Debian 13 / Kernel 6.12 LTS)
+## Designed for high-frequency Autonomous AI Agent workloads (lost=0 target)
+##
+## CRITICAL ORDERING NOTE:
+##   1. Buffer size (-b 8192) and failure mode (-f 1) MUST come FIRST.
+##   2. Watch and syscall rules come in the MIDDLE.
+##   3. Immutable lock (-e 2) MUST come LAST so all rules load before locking.
+##
+## Install:
+##   sudo cp configs/auditd/99-kether.rules /etc/audit/rules.d/
+##   sudo augenrules --load
+##   sudo auditctl -s
+##
+## Author: Eng. Deivis Irio Mayer (Kether1) — ORCID: 0009-0003-3273-7883
+## License: MIT
+## =============================================================================
+
+# Remove any previous rules
+-D
+
+# High-capacity kernel audit backlog buffer (prevents dropped events under AI agent bursts)
+-b 8192
+
+# Failure mode: 1 = printk warning on critical failure (use 2 for panic in strict SCIF/air-gapped)
+-f 1
+
+## 1. Identity, Authentication & Privilege Policies
+-w /etc/passwd -p wa -k kether-identity
+-w /etc/shadow -p wa -k kether-identity
+-w /etc/group -p wa -k kether-identity
+-w /etc/gshadow -p wa -k kether-identity
+-w /etc/sudoers -p wa -k kether-sudoers
+-w /etc/sudoers.d/ -p wa -k kether-sudoers
+-w /var/log/auth.log -p wa -k kether-auth
+-w /etc/ssh/sshd_config -p wa -k kether-sshd
+-w /etc/ssh/sshd_config.d/ -p wa -k kether-sshd
+
+## 2. Kernel Modules & Sysctl Tampering
+-w /sbin/insmod -p x -k kether-modules
+-w /sbin/modprobe -p x -k kether-modules
+-w /sbin/rmmod -p x -k kether-modules
+-w /etc/modprobe.d/ -p wa -k kether-modules
+-w /etc/sysctl.conf -p wa -k kether-sysctl
+-w /etc/sysctl.d/ -p wa -k kether-sysctl
+
+## 3. MAC (AppArmor), Firewall (nftables) & Audit Self-Protection
+-w /etc/apparmor/ -p wa -k kether-mac-tamper
+-w /etc/apparmor.d/ -p wa -k kether-mac-tamper
+-w /etc/nftables.conf -p wa -k kether-fw-tamper
+-w /etc/audit/ -p wa -k kether-audit-tamper
+
+## 4. Root Execution & Privilege Escalation Telemetry
+-a always,exit -F arch=b64 -S execve -F euid=0 -k kether-root-commands
+-a always,exit -F arch=b32 -S execve -F euid=0 -k kether-root-commands
+-a always,exit -F arch=b64 -S setuid -S setgid -S setreuid -S setregid -k kether-priv-esc
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F euid=0 -k kether-root-delete
+
+## 5. Network & Host Identity Modifications
+-a always,exit -F arch=b64 -S sethostname -S setdomainname -k kether-net-modify
+-w /etc/hosts -p wa -k kether-hosts
+-w /root/.ssh/ -p wa -k kether-ssh-keys
+
+## 6. Immutable Mode — MUST BE THE FINAL RULE IN THE RULESET
+# Prevents modifying or disabling audit rules until the next system reboot.
+-e 2

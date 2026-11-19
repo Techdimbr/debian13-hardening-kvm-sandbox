@@ -1,28 +1,33 @@
 # Techdim Debian 13 Hardening Framework & Ephemeral KVM Sandbox (`Kether_1`)
 
-<!-- Substitua pelo badge oficial do Concept DOI assim que a Release v1.0.0 for arquivada no Zenodo -->
-<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) -->
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![DOI (All Versions)](https://zenodo.org/badge/DOI/10.5281/zenodo.24380374.svg)](https://doi.org/10.5281/zenodo.24380374)
+[![License: MIT](https://img.shields.io/badge/Code%20License-MIT-blue.svg)](LICENSE)
+[![Docs: CC-BY-4.0](https://img.shields.io/badge/Docs%20License-CC--BY--4.0-lightgrey.svg)](LICENSE-DOCS)
 [![CFF 1.2.0](https://img.shields.io/badge/Citation-CFF%201.2.0-green.svg)](CITATION.cff)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0003--3273--7883-A6CE39.svg)](https://orcid.org/0009-0003-3273-7883)
 
-> **Arquitetura reproduzível de segurança Zero Trust (CIS Debian 13 + BeyondCorp) para estações e servidores Linux que executam agentes de IA autônomos sem quebrar `userns`, `eBPF` ou isolamento efêmero KVM/QCOW2.**
+> **Arquitetura reproduzível de segurança Zero Trust (CIS Debian 13 Level 2 + BeyondCorp) e isolamento em Sandbox KVM/QCOW2 Efêmera para estações e servidores Linux que executam agentes de IA autônomos sem quebrar `userns`, `eBPF` ou telemetria forense `auditd`.**
 
 **Autor:** Eng. Deivis Irio Mayer (`Kether1`) — [ORCID: 0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883)  
 **Organização:** TECHDIM INOVA SIMPLES (I.S.) - ME — Campinas, SP, Brasil  
+**Concept DOI (todas as versões):** https://doi.org/10.5281/zenodo.24380374  
+**Version DOI (`v1.0.1`):** https://doi.org/10.5281/zenodo.24380375  
 **Catálogo Open-Core:** [techdim.github.io](https://techdim.github.io/)
 
 ---
 
 ## Visão Geral Científica
 
-A execução local de agentes de IA autônomos e ferramentas de desenvolvimento em estações Linux impõe uma tensão arquitetural direta: controles clássicos de hardening (como `lockdown=integrity`, restrições globais de `unprivileged_userns_clone`, bloqueio indiscriminado de BPF e perfis AppArmor legados) frequentemente quebram sandboxes modernas, contêineres *rootless* e hipervisores efêmeros.
+A execução local de agentes de IA autônomos em hosts Linux endurecidos cria uma tensão arquitetural direta entre controles rígidos de segurança e primitivas modernas de sandboxing. O framework **`Kether_1`** entrega artefatos executáveis, configurações determinísticas e instrumentação auditável nas **6 camadas de defesa em profundidade**:
 
-Este repositório fornece:
-1. **Arquitetura de Hardening Debian 13 ("Trixie", Kernel 6.12 LTS):** alinhada ao CIS Benchmark Level 2 e princípios Zero Trust (`sysctl`, `AppArmor`, `nftables`, `auditd -b 8192`, LUKS2/LVM, `USBGuard`, `AIDE`).
-2. **Isolamento por Sandbox KVM Efêmera (QCOW2 copy-on-write):** execução descartável de workloads de agentes com rollback instantâneo.
-3. **Coletor Reproduzível de Métricas Experimentais ([`scripts/collect_kether_metrics.sh`](scripts/collect_kether_metrics.sh)):** coleta somente leitura de evidências do host com manifesto criptográfico `SHA-256` para reprodutibilidade científica.
-4. **Pipeline Científico Automatizado ([`.github/workflows/scientific-release.yml`](.github/workflows/scientific-release.yml)):** validação contínua de `CITATION.cff`, `.zenodo.json` e scripts Bash + integração pronta para Zenodo (Sandbox e Produção) e ORCID via DataCite.
+| Camada | Artefatos Executáveis no Repositório |
+| :--- | :--- |
+| **L1 — Storage & Firmware** | Auditoria LUKS2, LVM, UEFI Secure Boot, TPM 2.0, `/etc/shadow` e `unattended-upgrades` (`K1-01`..`K1-06`) |
+| **L2 — Kernel & Sysctl** | [`configs/sysctl/99-kether-hardening.conf`](configs/sysctl/99-kether-hardening.conf) (`lockdown=integrity`, ASLR=2, `kptr_restrict=2`, BPF endurecido, `userns` mediado) |
+| **L3 — MAC Confinement** | [`configs/apparmor/kether-ai-agent-userns`](configs/apparmor/kether-ai-agent-userns) (permissão seletiva de `userns` + `deny` explícito de `~/.ssh`, `~/.gnupg`, `/etc/shadow`, `/proc/kcore`) |
+| **L4 — Network Zero Trust** | [`configs/nftables/kether-workstation.nft`](configs/nftables/kether-workstation.nft) (`policy drop` em `input`/`forward`/`output` + bloqueio lateral `virbr0 → RFC1918`), [`configs/systemd/resolved-dot.conf`](configs/systemd/resolved-dot.conf) (DoT+DNSSEC), [`configs/ssh/99-kether-sshd.conf`](configs/ssh/99-kether-sshd.conf) |
+| **L5 — Telemetry & Integrity** | [`configs/auditd/99-kether.rules`](configs/auditd/99-kether.rules) (`-b 8192` no topo, `-e 2` imutável no final), [`configs/systemd/journald-kether.conf`](configs/systemd/journald-kether.conf), [`scripts/benchmark_auditd_stress.sh`](scripts/benchmark_auditd_stress.sh) |
+| **L6 — Ephemeral KVM Sandbox** | [`scripts/kvm_ephemeral_sandbox.sh`](scripts/kvm_ephemeral_sandbox.sh) (overlays QCOW2 Copy-on-Write descartáveis sobre imagem golden `chmod a-w` + verificação `SHA-256`) |
 
 ---
 
@@ -31,40 +36,56 @@ Este repositório fornece:
 ```text
 .
 ├── .github/workflows/
-│   └── scientific-release.yml   # CI: validação CFF 1.2.0, .zenodo.json, Bash e upload Zenodo API
+│   └── scientific-release.yml      # CI: cffconvert, .zenodo.json, shellcheck, unittest e API Zenodo
+├── configs/
+│   ├── apparmor/kether-ai-agent-userns
+│   ├── auditd/99-kether.rules
+│   ├── nftables/kether-workstation.nft
+│   ├── ssh/99-kether-sshd.conf
+│   ├── sysctl/99-kether-hardening.conf
+│   └── systemd/{resolved-dot.conf,journald-kether.conf}
 ├── docs/
-│   └── WHITEPAPER_v1.0.0.md     # Nota Técnica / Whitepaper científico pronto para PDF + DOI cruzado
+│   ├── WHITEPAPER.md               # Nota Técnica / Artigo (Threat Model, Metodologia, Benchmarks)
+│   └── PEER_REVIEW_RESPONSE_v1.0.1.md # Resposta formal à revisão por pares do Zenodo v1.0.1
 ├── scripts/
-│   └── collect_kether_metrics.sh # Coletor auditável de métricas Debian 13 + KVM + SHA-256
-├── .zenodo.json                 # Metadados oficiais para indexação automática no Zenodo
-├── CITATION.cff                 # Metadados de citação padrão CFF 1.2.0 (botão "Cite this repository")
-├── LICENSE                      # Licença MIT (SPDX: MIT)
-└── README.md
+│   ├── collect_kether_metrics.sh   # Coletor endurecido das 6 camadas (JSON tipado + privilege_context)
+│   ├── audit_cis_43_controls.sh    # Auditor dos 43 controles CIS Debian 13 + BeyondCorp
+│   ├── kvm_ephemeral_sandbox.sh    # Orquestrador KVM/QCOW2 efêmero (--dry-run, create, destroy, benchmark)
+│   └── benchmark_auditd_stress.sh  # Teste de estresse auditd verificando lost_delta == 0
+├── tests/
+│   └── test_framework.py           # Suíte automatizada de testes estruturais e funcionais
+├── .zenodo.json
+├── CHANGELOG.md
+├── CITATION.cff
+├── LICENSE                         # MIT (código, scripts e configurações)
+└── LICENSE-DOCS                    # CC-BY-4.0 (Whitepaper e documentação)
 ```
 
 ---
 
 ## Reprodutibilidade Rápida (Debian 13)
 
-Para gerar um relatório experimental verificável em um host Debian 13 (somente leitura, sem alterar configurações do sistema):
-
 ```bash
-chmod +x scripts/collect_kether_metrics.sh
-./scripts/collect_kether_metrics.sh ./benchmarks/run_local
-```
+# 1. Coleta das 6 camadas + teste funcional de overlay QCOW2 (JSON tipado + Markdown + SHA-256)
+sudo ./scripts/collect_kether_metrics.sh --require-root --test-qcow2-overlay ./benchmarks/run_local
 
-Saída gerada:
-* `metrics_report.json` — versão Debian/kernel, estado de `lockdown`, `userns`, `bpf`, contagem de perfis AppArmor (`enforce`/`complain`), backlog `auditd`, tabelas `nftables` e presença KVM.
-* `SHA256SUMS.txt` — hash criptográfico de integridade da coleta.
+# 2. Auditoria dos 43 controles CIS Debian 13 + BeyondCorp Zero Trust
+sudo ./scripts/audit_cis_43_controls.sh ./benchmarks/cis43_local
+
+# 3. Teste de estresse auditd (valida lost_delta == 0 e backlog_limit >= 8192)
+sudo ./scripts/benchmark_auditd_stress.sh --events 10000
+
+# 4. Dry-run determinístico do ciclo de vida da Sandbox KVM Efêmera
+./scripts/kvm_ephemeral_sandbox.sh create --base /var/lib/libvirt/images/debian13-golden.qcow2 --dry-run
+
+# 5. Executar a suíte de testes local (sem privilégios de root)
+python3 -m unittest discover -s tests -v
+```
 
 ---
 
-## Publicação Científica & Citação (Zenodo + ORCID)
+## Licenciamento e Citação
 
-1. Adicione seu **ORCID iD** em [`CITATION.cff`](CITATION.cff) (`orcid: "https://orcid.org/0000-000X-XXXX-XXXX"`) e em [`.zenodo.json`](.zenodo.json) (`"orcid": "0000-000X-XXXX-XXXX"`).
-2. Ative este repositório em [zenodo.org/account/settings/github/](https://zenodo.org/account/settings/github/).
-3. Crie a GitHub Release `v1.0.0` para emissão automática do **Version DOI**, **Concept DOI**, arquivamento no **Software Heritage** e atualização automática no **ORCID** (via DataCite Auto-Update).
-
-### Como Citar
-
-Utilize o botão **"Cite this repository"** na barra lateral do GitHub ou o arquivo [`CITATION.cff`](CITATION.cff).
+* **Código, scripts e configurações:** [MIT License](LICENSE) (`SPDX: MIT`).
+* **Nota Técnica (`docs/WHITEPAPER.md`) e documentação:** [CC-BY-4.0](LICENSE-DOCS).
+* **Como citar:** Utilize o botão **"Cite this repository"** do GitHub ([`CITATION.cff`](CITATION.cff)) ou cite o Concept DOI persistente `https://doi.org/10.5281/zenodo.24380374`.

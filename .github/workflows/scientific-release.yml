@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   validate-metadata:
-    name: Validate CITATION.cff, .zenodo.json & Shell Scripts
+    name: Validate CFF, Zenodo JSON, ShellCheck & Framework Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -61,13 +61,18 @@ jobs:
           print(".zenodo.json schema checks passed")
           PY
 
-      - name: Syntax check Bash scripts
+      - name: Syntax & ShellCheck audit on Bash scripts
         run: |
           shopt -s globstar nullglob
-          for f in **/*.sh; do
+          for f in scripts/*.sh; do
             echo "Checking $f"
             bash -n "$f"
+            shellcheck "$f"
           done
+
+      - name: Run automated framework & collector test suite
+        run: |
+          python3 -m unittest discover -s tests -v
 
   zenodo-api-deposit:
     name: Automated Zenodo API Deposit (Sandbox or Production)

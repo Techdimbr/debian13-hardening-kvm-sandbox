@@ -1,0 +1,83 @@
+#include <tunables/global>
+
+# =============================================================================
+# Kether_1 — Selective Unprivileged User Namespace (userns) AppArmor 4.x Profile
+# Target: Confined Autonomous AI Agent Sandboxes on Debian 13 (Trixie)
+# Purpose: Grants explicit `userns` creation ONLY to vetted sandbox runtimes
+#          (e.g., bubblewrap / rootless podman / agent runner wrapper) when
+#          kernel.apparmor_restrict_unprivileged_userns=1 is enabled, while
+#          explicitly denying access to host credentials, SSH keys, and raw
+#          kernel/block interfaces.
+#
+# Install (adapt binary path to your local sandbox launcher):
+#   sudo cp configs/apparmor/kether-ai-agent-userns /etc/apparmor.d/
+#   sudo apparmor_parser -r -W /etc/apparmor.d/kether-ai-agent-userns
+#   sudo aa-enforce /etc/apparmor.d/kether-ai-agent-userns
+#
+# Author: Eng. Deivis Irio Mayer (Kether1) — ORCID: 0009-0003-3273-7883
+# License: MIT
+# =============================================================================
+
+profile kether-ai-agent-userns /usr/local/bin/kether-agent-sandbox flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  # Core Kether_1 contribution:
+  # Selective userns grant for this confined runtime only (AppArmor 4.x)
+  userns,
+
+  # Minimal capabilities required inside isolated user namespace
+  capability sys_admin,
+  capability sys_chroot,
+  capability setuid,
+  capability setgid,
+  capability dac_override,
+
+  # Allowed execution paths (sandbox wrapper & vetted runtime binaries)
+  /usr/local/bin/kether-agent-sandbox mr,
+  /usr/bin/bwrap ix,
+  /usr/bin/podman ix,
+  /usr/bin/python3* ix,
+  /usr/bin/node ix,
+
+  # Ephemeral workspace & scratch areas ONLY
+  owner /tmp/kether-sandbox-*/** rwkl,
+  owner /var/tmp/kether-sandbox-*/** rwkl,
+  owner @{HOME}/kether-workspaces/** rwk,
+
+  # Read-only runtime & proc/sys introspection needed for sandbox setup
+  /etc/passwd r,
+  /etc/group r,
+  /etc/subuid r,
+  /etc/subgid r,
+  @{PROC}/@{pid}/** r,
+  @{PROC}/self/uid_map rw,
+  @{PROC}/self/gid_map rw,
+  @{PROC}/self/setgroups rw,
+
+  # ---------------------------------------------------------------------------
+  # EXPLICIT DENY RULES — ZERO TRUST CREDENTIAL & KERNEL BOUNDARY
+  # ---------------------------------------------------------------------------
+  deny @{HOME}/.ssh/** rwx,
+  deny @{HOME}/.gnupg/** rwx,
+  deny @{HOME}/.aws/** rwx,
+  deny @{HOME}/.config/gcloud/** rwx,
+  deny @{HOME}/.kube/** rwx,
+  deny @{HOME}/.netrc rwx,
+  deny @{HOME}/.git-credentials rwx,
+  deny @{HOME}/**/.env rwx,
+  deny /root/** rwx,
+  deny /etc/shadow rwx,
+  deny /etc/gshadow rwx,
+  deny /etc/sudoers rwx,
+  deny /etc/sudoers.d/** rwx,
+  deny /etc/apparmor.d/** w,
+  deny /etc/audit/** w,
+  deny /etc/nftables.conf w,
+  deny /proc/kcore rwx,
+  deny /dev/mem rwx,
+  deny /dev/kmem rwx,
+  deny /dev/sd* rwx,
+  deny /dev/nvme* rwx,
+  deny /sys/kernel/security/** w,
+}

@@ -64,7 +64,7 @@ jobs:
       - name: Syntax & ShellCheck audit on Bash scripts
         run: |
           shopt -s globstar nullglob
-          for f in scripts/*.sh; do
+          for f in scripts/*.sh docs/paper/*.sh; do
             echo "Checking $f"
             bash -n "$f"
             shellcheck "$f"

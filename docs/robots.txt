@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://techdimbr.github.io/debian13-hardening-kvm-sandbox/sitemap.xml

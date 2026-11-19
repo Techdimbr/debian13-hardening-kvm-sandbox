@@ -1,8 +1,9 @@
 # Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents (`Kether_1` Framework)
 
 **Version:** `1.1.0-rc1` *(Revision addressing Peer Review of Zenodo Record `v1.0.1`)*  
-**Author:** Eng. Deivis Irio Mayer (`Kether1`) — ORCID: [0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883)  
+**Author:** Deivis Irio Mayer (`Kether1`) — ORCID: [0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883) · Google Scholar: [Ik00pFwAAAAJ](https://scholar.google.com/citations?user=Ik00pFwAAAAJ&hl=pt-BR)  
 **Affiliation:** TECHDIM INOVA SIMPLES (I.S.) - ME, Campinas — SP, Brazil  
+**Formatted Academic PDF (Google Scholar Ready):** [`docs/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf`](paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf) · [`citation.bib`](paper/citation.bib)  
 **Repository:** https://github.com/Techdimbr/debian13-hardening-kvm-sandbox  
 **Concept DOI (All Versions):** https://doi.org/10.5281/zenodo.24380374  
 **Previous Version DOI (`v1.0.1`):** https://doi.org/10.5281/zenodo.24380375  

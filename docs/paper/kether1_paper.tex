@@ -1,0 +1,276 @@
+\documentclass[11pt,a4paper]{article}
+
+% Google Scholar Inclusion Guidelines:
+% Avoid Type 3 bitmap fonts; use standard Type 1 fonts (Times/Helvetica/Courier)
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{courier}
+\usepackage[a4paper,margin=2.2cm,top=2.4cm,bottom=2.4cm]{geometry}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage[hyphens,obeyspaces]{url}
+\usepackage[
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!55!black,
+  pdftitle={Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether\_1 Framework},
+  pdfauthor={Deivis Irio Mayer},
+  pdfsubject={Technical Report TECHDIM-TR-2026-01 -- Reproducible Six-Layer Zero Trust Hardening and Ephemeral KVM/QCOW2 Sandboxing on Debian 13 for Autonomous AI Agents},
+  pdfkeywords={Debian 13, Linux kernel hardening, Zero Trust, BeyondCorp, CIS Benchmark Level 2, AppArmor userns, ephemeral KVM sandbox, QCOW2 Copy-on-Write, auditd, autonomous AI agents, reproducible security}
+]{hyperref}
+
+% Allow clean line wrapping inside long code/path tokens without overfull hboxes
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\definecolor{accent}{RGB}{22, 78, 135}
+\definecolor{muted}{RGB}{85, 95, 110}
+
+% Page headers & footers (Page 1 carries explicit bibliographic citation per Google Scholar guidelines)
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\textcolor{muted}{D. I. Mayer --- The Kether\_1 Framework (TECHDIM-TR-2026-01)}}
+\fancyhead[R]{\footnotesize\textcolor{muted}{DOI: 10.5281/zenodo.24380374}}
+\fancyfoot[C]{\footnotesize\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+
+\fancypagestyle{firstpage}{
+  \fancyhf{}
+  \fancyhead[C]{\footnotesize\textcolor{muted}{Technical Report TECHDIM-TR-2026-01, TECHDIM INOVA SIMPLES (I.S.) - ME, Zenodo DOI: 10.5281/zenodo.24380374, November 19, 2026}}
+  \fancyfoot[C]{\footnotesize\textcolor{muted}{Licensed under CC-BY-4.0 (Text) and MIT (Software). Software Archive: \url{https://doi.org/10.5281/zenodo.24380374}}}
+  \renewcommand{\headrulewidth}{0.4pt}
+}
+
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+\sloppy
+
+\begin{document}
+\thispagestyle{firstpage}
+
+% Title block formatted strictly according to Google Scholar Inclusion Guidelines:
+% - Large title at top of page 1
+% - Author name alone on the line immediately below (no degrees/affiliations inline)
+% - Date on its own line
+\begin{center}
+  {\LARGE\bfseries Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether\_1 Framework\par}
+  \vspace{0.8em}
+  {\large Deivis Irio Mayer\par}
+  \vspace{0.4em}
+  {\small\textcolor{muted}{TECHDIM INOVA SIMPLES (I.S.) - ME, Campinas, SP, Brazil}\par}
+  {\small\textcolor{muted}{ORCID: \href{https://orcid.org/0009-0003-3273-7883}{0009-0003-3273-7883} $\cdot$ Google Scholar: \href{https://scholar.google.com/citations?user=Ik00pFwAAAAJ}{Ik00pFwAAAAJ} $\cdot$ \href{mailto:techdimbrasil@gmail.com}{techdimbrasil@gmail.com}}\par}
+  \vspace{0.5em}
+  {\small November 19, 2026\par}
+\end{center}
+
+\vspace{0.3em}
+\hrule
+\vspace{0.7em}
+
+\begin{abstract}
+Autonomous artificial intelligence (AI) coding and systems-operations agents increasingly execute build toolchains, browsers, shell commands, and untrusted third-party dependencies directly on developer workstations and edge Linux servers. Traditional enterprise hardening baselines---such as CIS Benchmark Level 2, Linux kernel lockdown, global disabling of unprivileged user namespaces (\code{userns}), and default \code{auditd} kernel buffers---frequently break rootless sandboxes or drop forensic telemetry during high-frequency agent tool invocations. This technical report introduces and delivers the \textbf{Kether\_1 Framework}, a reproducible six-layer defense-in-depth architecture targeting Debian 13 (\emph{Trixie}, Linux Kernel 6.12 LTS). The framework resolves the tension between strict Zero Trust confinement and autonomous agent execution through: (1) deployable baselines across \code{sysctl}, selective \code{userns} AppArmor 4.x confinement, default-deny \code{nftables} with lateral KVM bridge isolation, ordered lossless \code{auditd} (\code{-b 8192}, immutable \code{-e 2}), DNS-over-TLS, and post-quantum hybrid OpenSSH 10; (2) an idempotent Copy-on-Write (CoW) QCOW2 ephemeral KVM sandbox orchestrator enforcing read-only golden backing images with SHA-256 post-teardown integrity proofs; (3) a privilege-aware, strongly typed JSON six-layer telemetry collector and 43-control CIS/BeyondCorp auditor; and (4) a transparent comparative experimental protocol and continuous integration test suite. All configurations, scripts, and tests are openly archived under MIT and CC-BY-4.0 licenses at \url{https://doi.org/10.5281/zenodo.24380374}.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Debian 13; Linux kernel hardening; Zero Trust; BeyondCorp; CIS Benchmark Level 2; AppArmor \code{userns}; ephemeral KVM sandbox; QCOW2 Copy-on-Write; \code{auditd}; autonomous AI agent security; reproducible research.
+
+\section{Introduction and problem statement}
+
+Modern agentic engineering platforms enable autonomous AI agents to inspect repositories, invoke compilers, execute test harnesses, and interact with network APIs locally on Linux workstations and servers. While these capabilities accelerate software delivery, they fundamentally alter the local host threat model~\cite{owasp2025llm}. Unlike static human workflows, autonomous agents ingest untrusted external text (source code, issues, web pages, and package metadata) that may carry indirect prompt injections capable of triggering unintended local shell execution.
+
+Applying conventional enterprise Linux hardening baselines~\cite{cis2024debian} directly to hosts running autonomous agents exposes three recurring operational failure modes:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{Namespace and sandbox breakage:} Globally disabling unprivileged user namespaces (\code{kernel.unprivileged_userns_clone=0}) or applying overly broad Mandatory Access Control (MAC) policies breaks rootless containers (Podman), \code{bubblewrap}, and browser/agent sandboxes, pressuring operators to weaken isolation.
+  \item \textbf{Forensic telemetry loss:} High-frequency agent tool calls spawn hundreds of short-lived \code{execve} processes per minute. Default Linux audit kernel backlogs (\code{-b 64} or \code{-b 320}) suffer silent event drops (\code{lost > 0}), compromising forensic accountability~\cite{linuxaudit}.
+  \item \textbf{Persistent host state contamination and credential exposure:} Executing agent workflows directly against the host filesystem exposes developer SSH keys (\code{~/.ssh}), GPG keyrings, cloud SDK credentials, and \code{.env} secrets while allowing silent persistence via user crontabs or modified binaries.
+\end{enumerate}
+
+To address these gaps systematically, this technical report defines and implements the \textbf{Kether\_1 Framework} around three research questions:
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{RQ1:} Can a Debian 13 (Kernel 6.12 LTS) host enforce CIS Level 2 and BeyondCorp Zero Trust~\cite{ward2014beyondcorp,nist800207} kernel/network controls while selectively granting \code{userns} solely to AppArmor-confined sandbox runtimes?
+  \item \textbf{RQ2:} Does an ephemeral KVM/QCOW2 Copy-on-Write execution layer provide deterministic post-task rollback with zero mutation of the immutable golden base image (verified via SHA-256)?
+  \item \textbf{RQ3:} Does enlarging the \code{auditd} kernel backlog (\code{-b 8192}) with properly ordered immutable rules (\code{-e 2} placed strictly at finalization) preserve lossless telemetry (\code{lost_delta = 0}) under synthetic agent execution bursts?
+\end{itemize}
+
+\section{Formal threat model}
+
+Following the principles of least privilege and complete mediation~\cite{saltzer1975protection}, we model an adversary exploiting \emph{indirect prompt injection}, \emph{poisoned software dependencies}, or \emph{malicious tool output} inside an autonomous AI agent executing under an unprivileged local Linux account. Table~\ref{tab:threats} maps six primary STRIDE threat vectors to their concrete Kether\_1 architectural mitigations and deployable repository artifacts.
+
+\begin{table}[htbp]
+\centering
+\caption{STRIDE threat model for autonomous AI agent hosts and corresponding Kether\_1 mitigations.}
+\label{tab:threats}
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\textwidth}{@{}l p{2.7cm} L L@{}}
+\toprule
+\textbf{ID} & \textbf{STRIDE vector} & \textbf{Adversarial objective} & \textbf{Kether\_1 mitigation \& artifact} \\
+\midrule
+T1 & Information Disclosure & Exfiltrate \code{~/.ssh}, \code{~/.gnupg}, cloud tokens, \code{.env}, or \code{/etc/shadow}. & Explicit AppArmor \code{deny} rules + transient KVM boundary with zero host shared mounts (\code{configs/apparmor/kether-ai-agent-userns}). \\
+T2 & Elevation of Privilege & Exploit kernel \code{userns}, unprivileged eBPF, \code{ptrace}, or leaked kernel pointers. & \code{lockdown=integrity}, \code{unprivileged_bpf_disabled=1}, \code{bpf_jit_harden=2}, \code{kptr_restrict=2}, and selective AppArmor \code{userns} (\code{configs/sysctl/99-kether-hardening.conf}). \\
+T3 & Tampering / Info Disclosure & Scan RFC1918 LAN neighbors or tunnel data over plaintext DNS. & \code{nftables} default-deny (\code{input}/\code{forward}/\code{output}), \code{virbr0}$\rightarrow$RFC1918 drop, and strict DNS-over-TLS port 853 (\code{configs/nftables/kether-workstation.nft}, \code{resolved-dot.conf}). \\
+T4 & Repudiation & Overflow \code{auditd} backlog (\code{lost > 0}) or tamper with audit/MAC configs. & \code{auditd -b 8192} at top, tamper watches, immutable \code{-e 2} at bottom, \code{journald} caps, and AIDE (\code{configs/auditd/99-kether.rules}). \\
+T5 & Tampering & Establish host persistence (cron, systemd, trojanized user binaries). & Ephemeral KVM/QCOW2 CoW overlays backed by \code{chmod a-w} golden image; overlay shredded on teardown (\code{scripts/kvm_ephemeral_sandbox.sh}). \\
+T6 & Physical / Offline & Cold disk extraction or rogue USB HID keystroke injection. & LUKS2/LVM full-disk encryption, UEFI Secure Boot, TPM 2.0, and USBGuard allowlisting (\code{scripts/audit_cis_43_controls.sh}). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Out of scope:} Hardware microarchitectural side-channels beyond upstream Debian Kernel 6.12 LTS mitigations, compromised OEM UEFI/microcode firmware pre-dating system provisioning, and data exfiltration performed over legitimately authorized HTTPS APIs within the agent's intended task boundary.
+
+\section{Six-layer defense-in-depth architecture}
+
+The Kether\_1 architecture partitions host defenses into six orthogonal layers (Table~\ref{tab:layers}), ensuring that compromise of a single runtime or sandbox boundary does not escalate to host credential theft, kernel tampering, or lateral network intrusion.
+
+\begin{table}[htbp]
+\centering
+\caption{Six-layer defense-in-depth architecture and mapping to repository artifacts and 43 CIS/BeyondCorp controls.}
+\label{tab:layers}
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\textwidth}{@{}l p{2.3cm} c L@{}}
+\toprule
+\textbf{Layer} & \textbf{Domain} & \textbf{Controls} & \textbf{Core controls \& deployable artifacts} \\
+\midrule
+L1 & Storage \& firmware & 6 (K1-01..06) & LUKS2 full-disk encryption, LVM segmentation, UEFI Secure Boot, TPM 2.0, \code{/etc/shadow <= 0640}, \code{unattended-upgrades}. \\
+L2 & Kernel \& \code{sysctl} & 15 (K1-07..21) & \code{lockdown=integrity}~\cite{linuxlockdown}, ASLR=2, \code{kptr_restrict=2}, \code{dmesg_restrict=1}, \code{unprivileged_bpf_disabled=1}, \code{bpf_jit_harden=2}, \code{yama.ptrace_scope=1}, anti-spoofing (\code{rp_filter=1}, \code{tcp_syncookies=1}), and \code{unprivileged_userns_clone=1} mediated by Layer 3 (\code{configs/sysctl/99-kether-hardening.conf}). \\
+L3 & MAC confinement & 4 (K1-22..25) & AppArmor 4.x enforcing profiles with selective \code{userns,} rule confined to vetted sandbox launchers and explicit \code{deny} rules protecting host credentials and raw devices (\code{configs/apparmor/kether-ai-agent-userns})~\cite{apparmor4}. \\
+L4 & Network Zero Trust & 9 (K1-26..34) & \code{nftables} \code{policy drop} on \code{input}, \code{forward}, and \code{output}; explicit \code{virbr0} lateral block against RFC1918; \code{systemd-resolved} DNS-over-TLS + DNSSEC; OpenSSH 10 with post-quantum hybrid KEX (\code{sntrup761x25519-sha512@openssh.com}); Avahi/CUPS disabled. \\
+L5 & Telemetry \& integrity & 6 (K1-35..40) & \code{auditd} (\code{-D}, \code{-b 8192}, \code{-f 1} first; forensic watches; immutable \code{-e 2} strictly last), \code{journald} retention limits, AIDE baseline, USBGuard, and Lynis hardening index. \\
+L6 & Ephemeral KVM sandbox & 3 (K1-41..43) & Hardware-assisted KVM/QEMU transient domains backed by immutable QCOW2 golden images with Copy-on-Write overlays~\cite{qemuqcow2} and SHA-256 base-image verification (\code{scripts/kvm_ephemeral_sandbox.sh}). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Resolving the \texttt{userns} and \texttt{auditd} ordering conflicts}
+
+Two low-level Debian 13 engineering details merit explicit documentation because they represent frequent failure points in real deployments:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{Selective \texttt{userns} mediation (L2/L3):} Instead of setting \code{kernel.unprivileged_userns_clone=0} (which breaks rootless sandboxes globally), Kether\_1 pairs Debian 13's AppArmor 4.x unprivileged user namespace restriction with a dedicated profile (\code{kether-ai-agent-userns}) that grants \texttt{userns,} solely to the confined sandbox binary while denying read/write access to \code{@{HOME}/.ssh/**}, \code{@{HOME}/.gnupg/**}, cloud SDK directories, \code{/etc/shadow}, and \code{/proc/kcore}.
+  \item \textbf{Correct \code{auditd} rule ordering (L5):} Placing \code{-e 2} (immutable mode) at the top of \code{/etc/audit/rules.d/99-kether.rules} locks the kernel audit subsystem prematurely, causing subsequent rules in the file to be rejected. Kether\_1 enforces \code{-D}, \code{-b 8192}, and \code{-f 1} at the start of the ruleset and verifies via automated CI tests that \code{-e 2} is strictly the final non-comment directive.
+\end{itemize}
+
+\section{Implementation artifacts and reproducible instrumentation}
+
+To satisfy FAIR software principles~\cite{wilkinson2016fair} and remediate silent-failure anti-patterns common in ad-hoc security audit scripts (such as suppressing \code{stderr} with \code{2>/dev/null} and interpolating untyped strings into JSON here-documents), all Kether\_1 measurement tools enforce four invariants:
+
+\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{Explicit privilege context:} Both \code{scripts/collect_kether_metrics.sh} and \code{scripts/audit_cis_43_controls.sh} record \code{privilege_context} (\code{"root"} or \code{"unprivileged"}), \code{euid}, and per-probe status codes (\code{ok}, \code{permission_denied}, \code{not_installed}, \code{unavailable}). Passing \code{--require-root} aborts unprivileged runs cleanly, preventing false negatives from being misclassified as missing controls.
+  \item \textbf{Strongly typed JSON serialization:} All output payloads are serialized via Python's \code{json.dumps()}, ensuring native JSON integers, booleans, and \code{null} values without shell-escaping fragility.
+  \item \textbf{Cryptographic chain of custody:} Each execution writes a deterministic \code{SHA256SUMS.txt} manifest covering both machine-readable JSON and Markdown summary outputs.
+  \item \textbf{Automated CI verification:} Every commit executes \code{cffconvert --validate} (CFF 1.2.0), \code{.zenodo.json} ORCID schema checks, \code{shellcheck} static analysis across all Bash scripts, and a comprehensive \code{unittest} integration suite (\code{tests/test_framework.py}) validating JSON typing, all 43 control definitions, \code{nftables} \code{policy drop} invariants, \code{auditd} \code{-e 2} ordering, and KVM sandbox \code{--dry-run} plans.
+\end{enumerate}
+
+\section{Experimental evaluation protocol and verification}
+
+Reproducible empirical validation on physical Debian 13 hardware follows a four-step comparative protocol comparing a clean baseline Debian 13 installation against a hardened Kether\_1 host:
+
+\begin{small}
+\begin{verbatim}
+# 1. Six-layer telemetry + live QCOW2 CoW overlay benchmark
+sudo ./scripts/collect_kether_metrics.sh --require-root \
+     --test-qcow2-overlay ./benchmarks/run_hardened
+
+# 2. Full 43-control CIS Debian 13 & BeyondCorp compliance audit
+sudo ./scripts/audit_cis_43_controls.sh ./benchmarks/cis43_hardened
+
+# 3. Lossless auditd burst stress test (10,000 synthetic execve calls)
+sudo ./scripts/benchmark_auditd_stress.sh --events 10000
+
+# 4. Cryptographic manifest verification
+(cd ./benchmarks/run_hardened && sha256sum -c SHA256SUMS.txt)
+\end{verbatim}
+\end{small}
+
+Table~\ref{tab:protocol} specifies the acceptance criteria for each metric. In strict adherence to scientific transparency, empirical hardware measurements are kept separate from CI verification (which already passes all automated checks on GitHub Actions) and will be appended verbatim with SHA-256 manifests upon physical Debian 13 host capture in the subsequent empirical dataset release.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparative experimental protocol and target acceptance criteria (baseline vs. hardened Debian 13 host).}
+\label{tab:protocol}
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\textwidth}{@{}p{4.2cm} p{4.1cm} L@{}}
+\toprule
+\textbf{Evaluation metric} & \textbf{Measurement script} & \textbf{Target acceptance criterion} \\
+\midrule
+Lynis hardening index & \code{lynis} + \code{collect_kether_metrics.sh} & Hardening index $\ge 75$ (target $\ge 80$) post-hardening. \\
+43-control CIS/BeyondCorp pass rate & \code{audit_cis_43_controls.sh} & $\ge 90\%$ compliance ($\ge 39/43$) with \code{privilege_context="root"}. \\
+AppArmor enforcing + selective \code{userns} & \code{collect_kether_metrics.sh} & \code{profiles_enforce > 0} and \code{kether-ai-agent-userns} active. \\
+\code{nftables} default-deny posture & \code{collect_kether_metrics.sh} & \code{input}, \code{forward}, and \code{output} chains report \code{policy drop}. \\
+\code{auditd} burst stress ($10{,}000$ \code{execve}) & \code{benchmark_auditd_stress.sh} & \code{lost_delta == 0} and \code{backlog_limit >= 8192}. \\
+QCOW2 CoW overlay lifecycle & \code{kvm_ephemeral_sandbox.sh} & Overlay provisioning $< 50\,\mathrm{ms}$; \code{base_integrity_preserved == true}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Threats to validity and limitations}
+
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{Internal validity:} Running telemetry scripts without root privileges prevents kernel/MAC inspection (\code{aa-status}, \code{auditctl}, \code{nft}). Kether\_1 mitigates misinterpretation via explicit \code{privilege_context} and \code{permission_denied} fields plus \code{--require-root}.
+  \item \textbf{External validity:} Enabling \code{lockdown=integrity} with UEFI Secure Boot requires cryptographically signed kernel modules; workstations using unsigned out-of-tree DKMS drivers must enroll a Machine Owner Key (MOK) via \code{mokutil}.
+  \item \textbf{Operational scope:} Strict default-deny \code{output} filtering in \code{nftables} may require site-specific allowlist entries for developer protocols beyond ports 22, 80, 123, 443, and 853.
+\end{itemize}
+
+\section{Data, code availability, and dual licensing}
+
+All source configurations, audit scripts, KVM orchestrators, continuous integration workflows, and LaTeX manuscript sources are publicly available and permanently archived:
+
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{GitHub repository:} \url{https://github.com/Techdimbr/debian13-hardening-kvm-sandbox}
+  \item \textbf{Zenodo Concept DOI (all versions):} \url{https://doi.org/10.5281/zenodo.24380374}
+  \item \textbf{Zenodo Version DOI (\code{v1.0.1}):} \url{https://doi.org/10.5281/zenodo.24380375}
+  \item \textbf{Author persistent identifiers:} ORCID \url{https://orcid.org/0009-0003-3273-7883}; Google Scholar \url{https://scholar.google.com/citations?user=Ik00pFwAAAAJ}
+  \item \textbf{Dual licensing:} Software, scripts, and configurations are licensed under the \textbf{MIT License} (\code{LICENSE}); this technical report and repository documentation are licensed under \textbf{Creative Commons Attribution 4.0 International (CC-BY-4.0)} (\code{LICENSE-DOCS}).
+\end{itemize}
+
+\section{Conclusion and future work}
+
+The Kether\_1 Framework demonstrates that strong Zero Trust and CIS Level 2 Linux hardening can coexist cleanly with modern autonomous AI agent workflows when unprivileged user namespaces are mediated selectively via AppArmor 4.x, forensic auditing is buffered and finalized deterministically (\code{-b 8192}, \code{-e 2}), and untrusted agent execution is isolated inside disposable QCOW2/KVM sandboxes. Future work will publish full before/after physical Debian 13 hardware benchmark datasets, cold vs. CoW overlay VM boot latency distributions, and eBPF-based syscall anomaly detectors complementary to \code{auditd}.
+
+\begin{thebibliography}{10}
+
+\bibitem{ward2014beyondcorp}
+R.~Ward and B.~Beyer, ``BeyondCorp: A new approach to enterprise security,'' \emph{USENIX ;login:}, vol.~39, no.~6, pp.~6--11, Dec. 2014.
+
+\bibitem{nist800207}
+S.~Rose, O.~Borchert, S.~Mitchell, and S.~Connelly, ``Zero Trust Architecture,'' National Institute of Standards and Technology (NIST), Special Publication 800-207, Aug. 2020. doi: \href{https://doi.org/10.6028/NIST.SP.800-207}{10.6028/NIST.SP.800-207}.
+
+\bibitem{cis2024debian}
+Center for Internet Security (CIS), ``CIS Debian Linux Benchmark (Level 1 and Level 2),'' Technical Security Baseline, 2024--2026.
+
+\bibitem{saltzer1975protection}
+J.~H. Saltzer and M.~D. Schroeder, ``The protection of information in computer systems,'' \emph{Proceedings of the IEEE}, vol.~63, no.~9, pp.~1278--1308, Sep. 1975. doi: \href{https://doi.org/10.1109/PROC.1975.9939}{10.1109/PROC.1975.9939}.
+
+\bibitem{owasp2025llm}
+OWASP Foundation, ``OWASP Top 10 for Large Language Model Applications and Agentic AI Systems,'' Technical Report, 2025.
+
+\bibitem{linuxlockdown}
+The Linux Kernel Development Community, ``Kernel Lockdown Feature,'' Linux Kernel 6.12 LTS Security Documentation, 2025. Available: \url{https://www.kernel.org/doc/html/latest/security/}.
+
+\bibitem{apparmor4}
+AppArmor Project, ``AppArmor 4.x Unprivileged User Namespace Restriction (\texttt{apparmor\_restrict\_unprivileged\_userns}),'' Linux Security Modules Documentation, 2024--2025.
+
+\bibitem{linuxaudit}
+Linux Audit Project, ``Linux Audit Framework: \code{auditd}, \code{augenrules}, and \code{auditctl} Reference Manual,'' 2025.
+
+\bibitem{qemuqcow2}
+QEMU Project, ``QEMU Disk Image Utility (\code{qemu-img}) and QCOW2 Backing Files Specification,'' 2025. Available: \url{https://www.qemu.org/docs/master/tools/qemu-img.html}.
+
+\bibitem{wilkinson2016fair}
+M.~D. Wilkinson \emph{et~al.}, ``The FAIR Guiding Principles for scientific data management and stewardship,'' \emph{Scientific Data}, vol.~3, art.~160018, Mar. 2016. doi: \href{https://doi.org/10.1038/sdata.2016.18}{10.1038/sdata.2016.18}.
+
+\end{thebibliography}
+
+\end{document}

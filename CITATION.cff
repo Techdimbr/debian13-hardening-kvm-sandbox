@@ -14,6 +14,7 @@ authors:
     alias: "Kether1"
     affiliation: "TECHDIM INOVA SIMPLES (I.S.) - ME"
     email: "techdimbrasil@gmail.com"
+    orcid: "https://orcid.org/0009-0003-3273-7883"
 keywords:
   - "Debian 13"
   - "Linux Kernel Hardening"

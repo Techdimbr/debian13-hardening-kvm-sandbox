@@ -4,10 +4,11 @@
 <!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CFF 1.2.0](https://img.shields.io/badge/Citation-CFF%201.2.0-green.svg)](CITATION.cff)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0003--3273--7883-A6CE39.svg)](https://orcid.org/0009-0003-3273-7883)
 
 > **Arquitetura reproduzível de segurança Zero Trust (CIS Debian 13 + BeyondCorp) para estações e servidores Linux que executam agentes de IA autônomos sem quebrar `userns`, `eBPF` ou isolamento efêmero KVM/QCOW2.**
 
-**Autor:** Eng. Deivis Irio Mayer (`Kether1`)  
+**Autor:** Eng. Deivis Irio Mayer (`Kether1`) — [ORCID: 0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883)  
 **Organização:** TECHDIM INOVA SIMPLES (I.S.) - ME — Campinas, SP, Brasil  
 **Catálogo Open-Core:** [techdim.github.io](https://techdim.github.io/)
 

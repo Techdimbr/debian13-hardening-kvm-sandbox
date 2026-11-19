@@ -202,6 +202,35 @@ class TestKetherHardeningFramework(unittest.TestCase):
         self.assertIn("10.5281/zenodo.24380374", cff)
         self.assertNotRegex(cff, r"^\s+name:\s+", "Person entry in CFF 1.2.0 must not mix 'name:' with family-names")
 
+    def test_google_scholar_pdf_and_metadata_compliance(self):
+        pdf_path = ROOT / "docs/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf"
+        self.assertTrue(pdf_path.is_file(), "Compiled academic PDF must exist")
+        pdf_bytes = pdf_path.read_bytes()
+        self.assertTrue(pdf_bytes.startswith(b"%PDF-"), "PDF header invalid")
+        self.assertLess(len(pdf_bytes), 5 * 1024 * 1024, "PDF must stay under Google Scholar 5 MB limit")
+
+        html = (ROOT / "docs/paper/index.html").read_text(encoding="utf-8")
+        for required_tag in (
+            'name="citation_title"',
+            'name="citation_author" content="Mayer, Deivis Irio"',
+            'name="citation_publication_date" content="2026/11/19"',
+            'name="citation_technical_report_institution"',
+            'name="citation_doi" content="10.5281/zenodo.24380374"',
+            'name="citation_pdf_url" content="https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf"',
+            'name="DC.title"',
+            '"@type": "ScholarlyArticle"',
+            "Ik00pFwAAAAJ",
+        ):
+            self.assertIn(required_tag, html, f"Missing required Google Scholar tag: {required_tag}")
+
+        bib = (ROOT / "docs/paper/citation.bib").read_text(encoding="utf-8")
+        self.assertIn("10.5281/zenodo.24380374", bib)
+        self.assertIn("Mayer, Deivis Irio", bib)
+
+        robots = (ROOT / "docs/robots.txt").read_text(encoding="utf-8")
+        self.assertIn("Allow: /", robots)
+        self.assertNotIn("Disallow: /paper", robots)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether_1 Framework</title>
+  <meta name="description" content="Technical Report TECHDIM-TR-2026-01 by Deivis Irio Mayer (ORCID: 0009-0003-3273-7883). Reproducible six-layer Debian 13 hardening and ephemeral KVM/QCOW2 sandboxing for autonomous AI agents." />
+  <link rel="canonical" href="https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/" />
+
+  <!-- Google Scholar / Highwire Press Bibliographic Meta Tags -->
+  <meta name="citation_title" content="Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether_1 Framework" />
+  <meta name="citation_author" content="Mayer, Deivis Irio" />
+  <meta name="citation_author_institution" content="TECHDIM INOVA SIMPLES (I.S.) - ME" />
+  <meta name="citation_author_orcid" content="0009-0003-3273-7883" />
+  <meta name="citation_publication_date" content="2026/11/19" />
+  <meta name="citation_online_date" content="2026/11/19" />
+  <meta name="citation_technical_report_institution" content="TECHDIM INOVA SIMPLES (I.S.) - ME" />
+  <meta name="citation_technical_report_number" content="TECHDIM-TR-2026-01" />
+  <meta name="citation_doi" content="10.5281/zenodo.24380374" />
+  <meta name="citation_language" content="en" />
+  <meta name="citation_keywords" content="Debian 13; Linux kernel hardening; Zero Trust; BeyondCorp; CIS Benchmark Level 2; AppArmor userns; ephemeral KVM sandbox; QCOW2; auditd; autonomous AI agents" />
+  <meta name="citation_abstract_html_url" content="https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/" />
+  <meta name="citation_pdf_url" content="https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf" />
+
+  <!-- Dublin Core Bibliographic Meta Tags -->
+  <meta name="DC.title" content="Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether_1 Framework" />
+  <meta name="DC.creator" content="Mayer, Deivis Irio" />
+  <meta name="DC.issued" content="2026-11-19" />
+  <meta name="DC.publisher" content="TECHDIM INOVA SIMPLES (I.S.) - ME" />
+  <meta name="DC.type" content="Text" />
+  <meta name="DC.language" content="en" />
+  <meta name="DC.identifier" content="https://doi.org/10.5281/zenodo.24380374" />
+
+  <!-- Schema.org ScholarlyArticle JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether_1 Framework",
+    "identifier": "https://doi.org/10.5281/zenodo.24380374",
+    "datePublished": "2026-11-19",
+    "inLanguage": "en",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "author": {
+      "@type": "Person",
+      "name": "Deivis Irio Mayer",
+      "identifier": "https://orcid.org/0009-0003-3273-7883",
+      "sameAs": [
+        "https://orcid.org/0009-0003-3273-7883",
+        "https://scholar.google.com/citations?user=Ik00pFwAAAAJ&hl=pt-BR",
+        "https://github.com/Techdimbr"
+      ],
+      "affiliation": {
+        "@type": "Organization",
+        "name": "TECHDIM INOVA SIMPLES (I.S.) - ME"
+      }
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "TECHDIM INOVA SIMPLES (I.S.) - ME"
+    },
+    "encoding": {
+      "@type": "MediaObject",
+      "contentUrl": "https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf",
+      "encodingFormat": "application/pdf"
+    }
+  }
+  </script>
+
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: Georgia, "Times New Roman", serif; line-height: 1.65; max-width: 820px; margin: 2rem auto; padding: 0 1.25rem; color: #1a202c; background: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+      body { color: #e2e8f0; background: #0f172a; }
+      .box, pre { background: #1e293b; border-color: #334155; }
+      a { color: #60a5fa; }
+      .muted { color: #94a3b8; }
+    }
+    h1 { font-size: 1.75rem; line-height: 1.25; margin-bottom: 0.4rem; }
+    h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.25rem; }
+    .author { font-size: 1.15rem; font-weight: 600; margin: 0.2rem 0; }
+    .muted { color: #475569; font-size: 0.92rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.25rem 0; font-family: system-ui, -apple-system, sans-serif; }
+    .btn { display: inline-block; padding: 0.55rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; border: 1px solid #1d4ed8; color: #1d4ed8; }
+    .btn-primary { background: #1d4ed8; color: #ffffff; }
+    .box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1rem 1.2rem; margin: 1rem 0; }
+    pre { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.9rem; overflow-x: auto; font-size: 0.84rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    ol.refs li { margin-bottom: 0.45rem; font-size: 0.93rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="muted">Technical Report TECHDIM-TR-2026-01 &middot; November 19, 2026 &middot; <a href="../index.html">All Publications</a></p>
+    <h1>Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether_1 Framework</h1>
+    <p class="author">Deivis Irio Mayer</p>
+    <p class="muted">
+      TECHDIM INOVA SIMPLES (I.S.) - ME, Campinas, SP, Brazil<br />
+      ORCID: <a href="https://orcid.org/0009-0003-3273-7883">0009-0003-3273-7883</a> &middot;
+      Google Scholar: <a href="https://scholar.google.com/citations?user=Ik00pFwAAAAJ&amp;hl=pt-BR">Ik00pFwAAAAJ</a> &middot;
+      Zenodo Concept DOI: <a href="https://doi.org/10.5281/zenodo.24380374">10.5281/zenodo.24380374</a>
+    </p>
+  </header>
+
+  <nav class="actions" aria-label="Paper links">
+    <a class="btn btn-primary" href="Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf">Download Full Text (PDF)</a>
+    <a class="btn" href="citation.bib">BibTeX (.bib)</a>
+    <a class="btn" href="https://doi.org/10.5281/zenodo.24380374">Zenodo Archive (DOI)</a>
+    <a class="btn" href="https://github.com/Techdimbr/debian13-hardening-kvm-sandbox">Source Code (GitHub)</a>
+  </nav>
+
+  <main>
+    <section class="box">
+      <h2>Abstract</h2>
+      <p>
+        Autonomous artificial intelligence (AI) coding and systems-operations agents increasingly execute build toolchains, browsers, shell commands, and untrusted third-party dependencies directly on developer workstations and edge Linux servers. Traditional enterprise hardening baselines&mdash;such as CIS Benchmark Level 2, Linux kernel lockdown, global disabling of unprivileged user namespaces (<code>userns</code>), and default <code>auditd</code> kernel buffers&mdash;frequently break rootless sandboxes or drop forensic telemetry during high-frequency agent tool invocations. This technical report introduces and delivers the <strong>Kether_1 Framework</strong>, a reproducible six-layer defense-in-depth architecture targeting Debian 13 (<em>Trixie</em>, Linux Kernel 6.12 LTS). The framework resolves the tension between strict Zero Trust confinement and autonomous agent execution through: (1) deployable baselines across <code>sysctl</code>, selective <code>userns</code> AppArmor 4.x confinement, default-deny <code>nftables</code> with lateral KVM bridge isolation, ordered lossless <code>auditd</code> (<code>-b 8192</code>, immutable <code>-e 2</code>), DNS-over-TLS, and post-quantum hybrid OpenSSH 10; (2) an idempotent Copy-on-Write (CoW) QCOW2 ephemeral KVM sandbox orchestrator enforcing read-only golden backing images with SHA-256 post-teardown integrity proofs; (3) a privilege-aware, strongly typed JSON six-layer telemetry collector and 43-control CIS/BeyondCorp auditor; and (4) a transparent comparative experimental protocol and continuous integration test suite.
+      </p>
+      <p class="muted"><strong>Keywords:</strong> Debian 13, Linux kernel hardening, Zero Trust, BeyondCorp, CIS Benchmark Level 2, AppArmor userns, ephemeral KVM sandbox, QCOW2 Copy-on-Write, auditd, autonomous AI agents.</p>
+    </section>
+
+    <section>
+      <h2>How to cite (BibTeX)</h2>
+      <pre>@techreport{mayer2026kether1,
+  author      = {Mayer, Deivis Irio},
+  title       = {Zero Trust Hardening and Ephemeral KVM Sandboxing on Debian 13 for Autonomous AI Agents: The Kether\_1 Framework},
+  institution = {TECHDIM INOVA SIMPLES (I.S.) - ME},
+  number      = {TECHDIM-TR-2026-01},
+  year        = {2026},
+  month       = nov,
+  doi         = {10.5281/zenodo.24380374},
+  url         = {https://doi.org/10.5281/zenodo.24380374}
+}</pre>
+    </section>
+
+    <section>
+      <h2>References</h2>
+      <ol class="refs">
+        <li>R. Ward and B. Beyer, &ldquo;BeyondCorp: A new approach to enterprise security,&rdquo; <em>USENIX ;login:</em>, vol. 39, no. 6, pp. 6&ndash;11, Dec. 2014.</li>
+        <li>S. Rose, O. Borchert, S. Mitchell, and S. Connelly, &ldquo;Zero Trust Architecture,&rdquo; NIST Special Publication 800-207, Aug. 2020. doi: 10.6028/NIST.SP.800-207.</li>
+        <li>Center for Internet Security (CIS), &ldquo;CIS Debian Linux Benchmark (Level 1 and Level 2),&rdquo; 2024&ndash;2026.</li>
+        <li>J. H. Saltzer and M. D. Schroeder, &ldquo;The protection of information in computer systems,&rdquo; <em>Proceedings of the IEEE</em>, vol. 63, no. 9, pp. 1278&ndash;1308, Sep. 1975.</li>
+        <li>OWASP Foundation, &ldquo;OWASP Top 10 for Large Language Model Applications and Agentic AI Systems,&rdquo; 2025.</li>
+        <li>The Linux Kernel Development Community, &ldquo;Kernel Lockdown Feature,&rdquo; Linux Kernel 6.12 LTS Documentation, 2025.</li>
+        <li>AppArmor Project, &ldquo;AppArmor 4.x Unprivileged User Namespace Restriction,&rdquo; 2024&ndash;2025.</li>
+        <li>Linux Audit Project, &ldquo;Linux Audit Framework (auditd, augenrules, auditctl),&rdquo; 2025.</li>
+        <li>QEMU Project, &ldquo;QEMU Disk Image Utility (qemu-img) and QCOW2 Backing Files,&rdquo; 2025.</li>
+        <li>M. D. Wilkinson et al., &ldquo;The FAIR Guiding Principles for scientific data management and stewardship,&rdquo; <em>Scientific Data</em>, vol. 3, art. 160018, Mar. 2016.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="muted" style="margin-top:2rem; border-top:1px solid #cbd5e1; padding-top:1rem;">
+    Code licensed under MIT; Technical Report licensed under CC-BY-4.0.
+  </footer>
+</body>
+</html>

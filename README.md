@@ -5,11 +5,13 @@
 [![Docs: CC-BY-4.0](https://img.shields.io/badge/Docs%20License-CC--BY--4.0-lightgrey.svg)](LICENSE-DOCS)
 [![CFF 1.2.0](https://img.shields.io/badge/Citation-CFF%201.2.0-green.svg)](CITATION.cff)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0003--3273--7883-A6CE39.svg)](https://orcid.org/0009-0003-3273-7883)
+[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-Ik00pFwAAAAJ-4285F4.svg)](https://scholar.google.com/citations?user=Ik00pFwAAAAJ&hl=pt-BR)
 
 > **Arquitetura reproduzível de segurança Zero Trust (CIS Debian 13 Level 2 + BeyondCorp) e isolamento em Sandbox KVM/QCOW2 Efêmera para estações e servidores Linux que executam agentes de IA autônomos sem quebrar `userns`, `eBPF` ou telemetria forense `auditd`.**
 
-**Autor:** Eng. Deivis Irio Mayer (`Kether1`) — [ORCID: 0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883)  
+**Autor:** Eng. Deivis Irio Mayer (`Kether1`) — [ORCID: 0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883) · [Google Scholar](https://scholar.google.com/citations?user=Ik00pFwAAAAJ&hl=pt-BR)  
 **Organização:** TECHDIM INOVA SIMPLES (I.S.) - ME — Campinas, SP, Brasil  
+**Artigo Técnico (PDF — Google Scholar Ready):** [`Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf`](docs/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf) · [Página de Metadados (GitHub Pages)](https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/) · [`citation.bib`](docs/paper/citation.bib)  
 **Concept DOI (todas as versões):** https://doi.org/10.5281/zenodo.24380374  
 **Version DOI (`v1.0.1`):** https://doi.org/10.5281/zenodo.24380375  
 **Catálogo Open-Core:** [techdim.github.io](https://techdim.github.io/)

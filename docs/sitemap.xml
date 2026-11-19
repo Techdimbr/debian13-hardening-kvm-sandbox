@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://techdimbr.github.io/debian13-hardening-kvm-sandbox/</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+  <url>
+    <loc>https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+  <url>
+    <loc>https://techdimbr.github.io/debian13-hardening-kvm-sandbox/paper/Kether1_Debian13_Hardening_Ephemeral_KVM_Sandbox_2026.pdf</loc>
+    <lastmod>2026-11-19</lastmod>
+  </url>
+</urlset>

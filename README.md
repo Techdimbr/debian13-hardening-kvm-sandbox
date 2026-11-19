@@ -1,7 +1,6 @@
 # Techdim Debian 13 Hardening Framework & Ephemeral KVM Sandbox (`Kether_1`)
 
-<!-- Substitua pelo badge oficial do Concept DOI assim que a Release v1.0.0 for arquivada no Zenodo -->
-<!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) -->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24380375.svg)](https://doi.org/10.5281/zenodo.24380375)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CFF 1.2.0](https://img.shields.io/badge/Citation-CFF%201.2.0-green.svg)](CITATION.cff)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0003--3273--7883-A6CE39.svg)](https://orcid.org/0009-0003-3273-7883)

@@ -3,6 +3,7 @@
 **Author:** Eng. Deivis Irio Mayer (`Kether1`) — ORCID: [0009-0003-3273-7883](https://orcid.org/0009-0003-3273-7883)  
 **Affiliation:** TECHDIM INOVA SIMPLES (I.S.) - ME, Campinas — SP, Brazil  
 **Repository:** https://github.com/Techdimbr/debian13-hardening-kvm-sandbox  
+**Software DOI:** https://doi.org/10.5281/zenodo.24380375  
 **License:** MIT (Software) / CC-BY-4.0 (Technical Note)
 
 ---

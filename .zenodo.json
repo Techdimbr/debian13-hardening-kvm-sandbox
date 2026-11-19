@@ -1,6 +1,6 @@
 {
   "title": "Techdim Debian 13 Hardening Framework & Ephemeral KVM Sandbox (Kether_1)",
-  "description": "Reproducible Zero Trust and CIS Benchmark Level 2 hardening framework for Debian 13 (Trixie) hosts executing autonomous AI agents without breaking unprivileged user namespaces (userns) or eBPF. Includes deterministic hardening architecture, AppArmor confinement profiles, auditd telemetry, ephemeral QCOW2/KVM sandbox isolation, and an auditable metrics collector.",
+  "description": "Reproducible six-layer Zero Trust and CIS Benchmark Level 2 hardening framework for Debian 13 (Trixie, Kernel 6.12 LTS) hosts executing autonomous AI agents without breaking unprivileged user namespaces (userns) or eBPF. Includes deployable sysctl, AppArmor 4.x selective userns, default-deny nftables, ordered auditd (-b 8192, -e 2), DNS-over-TLS, OpenSSH 10 configurations, an ephemeral KVM/QCOW2 sandbox lifecycle orchestrator, a privilege-aware typed-JSON 6-layer metrics collector, a 43-control CIS/BeyondCorp auditor, and automated CI tests. Code is licensed under MIT; documentation and Technical Note (docs/WHITEPAPER.md) under CC-BY-4.0.",
   "upload_type": "software",
   "access_right": "open",
   "license": "mit",
@@ -19,6 +19,7 @@
     "CIS Benchmark",
     "AppArmor",
     "KVM Ephemeral Sandbox",
+    "QCOW2 Copy-on-Write",
     "Autonomous AI Agent Security",
     "nftables",
     "auditd"

@@ -1,13 +1,21 @@
 cff-version: 1.2.0
-message: "If you use this hardening framework, ephemeral KVM sandbox architecture, or benchmark collector in research or security audits, please cite it using the metadata below."
+message: "If you use this Debian 13 hardening framework, selective AppArmor userns profile, ephemeral KVM/QCOW2 sandbox orchestrator, or 43-control auditor in research or security audits, please cite it using the metadata below."
 type: software
 title: "Techdim Debian 13 Hardening Framework & Ephemeral KVM Sandbox (Kether_1)"
-abstract: "Reproducible Zero Trust and CIS Benchmark Level 2 hardening framework for Debian 13 (Trixie) workstations and servers executing autonomous AI agents without breaking unprivileged user namespaces (userns) or eBPF. Includes deterministic hardening guidance, AppArmor confinement policies, auditd telemetry, ephemeral QCOW2/KVM sandbox isolation, and a reproducible read-only metrics collector."
-version: "1.0.0"
+abstract: "Reproducible six-layer Zero Trust and CIS Benchmark Level 2 hardening framework for Debian 13 (Trixie, Kernel 6.12 LTS) hosts executing autonomous AI agents without breaking unprivileged user namespaces (userns) or eBPF. Provides deployable sysctl, AppArmor 4.x selective userns, default-deny nftables, ordered lossless auditd (-b 8192, -e 2), DNS-over-TLS, OpenSSH 10 configurations, an ephemeral QCOW2/KVM sandbox orchestrator, a strongly typed 6-layer metrics collector, and a 43-control CIS/BeyondCorp auditor."
+version: "1.1.0-rc1"
+doi: "10.5281/zenodo.24380374"
 date-released: "2026-11-19"
 license: "MIT"
 repository-code: "https://github.com/Techdimbr/debian13-hardening-kvm-sandbox"
 url: "https://techdim.github.io/"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24380374"
+    description: "Zenodo Concept DOI representing all versions"
+  - type: doi
+    value: "10.5281/zenodo.24380375"
+    description: "Zenodo Version DOI for v1.0.1"
 authors:
   - family-names: "Mayer"
     given-names: "Deivis Irio"
@@ -22,6 +30,7 @@ keywords:
   - "CIS Benchmark"
   - "AppArmor"
   - "KVM Ephemeral Sandbox"
+  - "QCOW2"
   - "Autonomous AI Agents"
   - "Cybersecurity"
   - "Reproducible Research"

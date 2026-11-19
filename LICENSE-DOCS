@@ -1,0 +1,23 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Eng. Deivis Irio Mayer (ORCID: 0009-0003-3273-7883)
+TECHDIM INOVA SIMPLES (I.S.) - ME — Campinas, SP, Brazil
+
+The Technical Note (docs/WHITEPAPER.md), Peer Review documentation, diagrams,
+and written documentation in this repository are licensed under the Creative
+Commons Attribution 4.0 International License (CC-BY-4.0).
+
+You are free to:
+  - Share — copy and redistribute the material in any medium or format
+  - Adapt — remix, transform, and build upon the material for any purpose,
+    even commercially.
+
+Under the following terms:
+  - Attribution — You must give appropriate credit (citing the author, ORCID,
+    and Zenodo Concept DOI 10.5281/zenodo.24380374), provide a link to the
+    license, and indicate if changes were made.
+
+Full legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+Note: All source code, shell scripts, tests, and configuration files in this
+repository are licensed under the MIT License (see LICENSE).

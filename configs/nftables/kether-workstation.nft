@@ -1,0 +1,86 @@
+#!/usr/sbin/nft -f
+# =============================================================================
+# Kether_1 — Deterministic nftables Default-Deny Ruleset (Debian 13 Trixie)
+# Policy: Default-deny input & forward, stateful established/related,
+#         KVM bridge isolation (virbr0), ICMP rate limiting, and explicit
+#         egress posture (DNS-over-TLS 853, HTTPS 443, NTP 123, SSH).
+#
+# Validate syntax before loading:
+#   sudo nft -c -f configs/nftables/kether-workstation.nft
+# Install:
+#   sudo cp configs/nftables/kether-workstation.nft /etc/nftables.conf
+#   sudo systemctl enable --now nftables
+#
+# Author: Eng. Deivis Irio Mayer (Kether1) — ORCID: 0009-0003-3273-7883
+# License: MIT
+# =============================================================================
+
+flush ruleset
+
+define LAN_NETS = { 192.168.0.0/24, 192.168.1.0/24 }
+define KVM_NET  = 192.168.122.0/24
+
+table inet kether_filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        # Allow loopback interface exclusively
+        iifname "lo" accept
+
+        # Drop invalid connection states immediately
+        ct state invalid drop
+
+        # Allow established and related return traffic
+        ct state established,related accept
+
+        # Rate-limited ICMP / ICMPv6 diagnostics
+        ip protocol icmp icmp type { echo-request, destination-unreachable, time-exceeded } limit rate 5/second accept
+        ip6 nexthdr icmpv6 icmpv6 type { echo-request, nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert, destination-unreachable, packet-too-big, time-exceeded } limit rate 10/second accept
+
+        # Restrict SSH administration strictly to trusted LAN subnets
+        ip saddr $LAN_NETS tcp dport 22 ct state new limit rate 5/minute accept
+
+        # Restrict KVM guest-to-host DHCP/DNS services on virbr0 only (no host SSH from ephemeral sandboxes)
+        iifname "virbr0" ip saddr $KVM_NET udp dport { 53, 67 } accept
+        iifname "virbr0" ip saddr $KVM_NET tcp dport 53 accept
+
+        # Log and drop remaining inbound attempts (rate-limited to prevent log flooding)
+        limit rate 5/minute log prefix "[KETHER-NFT-INPUT-DROP] " flags all counter drop
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+
+        ct state invalid drop
+        ct state established,related accept
+
+        # Controlled outbound NAT forwarding for ephemeral KVM sandbox (HTTP/HTTPS/DoT only)
+        # Prevent ephemeral KVM guests from reaching RFC1918 LAN lateral targets
+        iifname "virbr0" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } counter drop
+        iifname "virbr0" ip saddr $KVM_NET tcp dport { 443, 853 } ct state new accept
+
+        limit rate 5/minute log prefix "[KETHER-NFT-FWD-DROP] " counter drop
+    }
+
+    chain output {
+        type filter hook output priority filter; policy drop;
+
+        oifname "lo" accept
+        ct state invalid drop
+        ct state established,related accept
+
+        # Encrypted DNS (DNS-over-TLS 853/tcp) + HTTPS (443/tcp, 443/udp QUIC) + Debian APT (80/tcp)
+        tcp dport { 80, 443, 853 } ct state new accept
+        udp dport { 123, 443 } ct state new accept
+
+        # Outbound SSH (GitHub / remote administration)
+        tcp dport 22 ct state new accept
+
+        # Local DHCP & ICMP diagnostics
+        udp dport { 67, 68 } accept
+        ip protocol icmp accept
+        ip6 nexthdr icmpv6 accept
+
+        limit rate 5/minute log prefix "[KETHER-NFT-OUT-DROP] " counter drop
+    }
+}

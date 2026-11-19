@@ -1,0 +1,32 @@
+{
+  "title": "Techdim Debian 13 Hardening Framework & Ephemeral KVM Sandbox (Kether_1)",
+  "description": "Reproducible Zero Trust and CIS Benchmark Level 2 hardening framework for Debian 13 (Trixie) hosts executing autonomous AI agents without breaking unprivileged user namespaces (userns) or eBPF. Includes deterministic hardening architecture, AppArmor confinement profiles, auditd telemetry, ephemeral QCOW2/KVM sandbox isolation, and an auditable metrics collector.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "mit",
+  "language": "eng",
+  "creators": [
+    {
+      "name": "Mayer, Deivis Irio",
+      "affiliation": "TECHDIM INOVA SIMPLES (I.S.) - ME"
+    }
+  ],
+  "keywords": [
+    "Debian 13",
+    "Linux Kernel Hardening",
+    "Zero Trust Architecture",
+    "CIS Benchmark",
+    "AppArmor",
+    "KVM Ephemeral Sandbox",
+    "Autonomous AI Agent Security",
+    "nftables",
+    "auditd"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Techdimbr/debian13-hardening-kvm-sandbox",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ]
+}

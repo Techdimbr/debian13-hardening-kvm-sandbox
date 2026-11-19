@@ -1,0 +1,138 @@
+name: Scientific Metadata Validation & Zenodo Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Ambiente Zenodo (sandbox recomendado para testes)"
+        required: true
+        default: "sandbox"
+        type: choice
+        options:
+          - sandbox
+          - production
+      auto_publish:
+        description: "Publicar imediatamente (false = cria rascunho seguro para revisao)"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  validate-metadata:
+    name: Validate CITATION.cff, .zenodo.json & Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate CITATION.cff (Schema 1.2.0)
+        run: |
+          pip install --quiet cffconvert
+          cffconvert --validate
+          echo "CITATION.cff is valid against CFF 1.2.0"
+
+      - name: Validate .zenodo.json structure
+        run: |
+          python3 - <<'PY'
+          import json, re
+          with open(".zenodo.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+          required = ["title", "upload_type", "creators", "license", "access_right"]
+          missing = [k for k in required if k not in data]
+          assert not missing, f"Missing required fields: {missing}"
+          orcid_re = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+          for c in data["creators"]:
+              assert "name" in c, "Creator missing 'name'"
+              if "orcid" in c:
+                  assert orcid_re.match(c["orcid"]), f"Invalid ORCID format: {c['orcid']}"
+          print(".zenodo.json schema checks passed")
+          PY
+
+      - name: Syntax check Bash scripts
+        run: |
+          shopt -s globstar nullglob
+          for f in **/*.sh; do
+            echo "Checking $f"
+            bash -n "$f"
+          done
+
+  zenodo-api-deposit:
+    name: Automated Zenodo API Deposit (Sandbox or Production)
+    needs: validate-metadata
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create deterministic source archive
+        run: |
+          TAG="${GITHUB_REF_NAME:-main}"
+          git archive --format=zip --prefix="debian13-hardening-kvm-sandbox-${TAG}/" HEAD > "debian13-hardening-kvm-sandbox-${TAG}.zip"
+          sha256sum "debian13-hardening-kvm-sandbox-${TAG}.zip" > SHA256SUMS.txt
+
+      - name: Upload deposition to Zenodo
+        env:
+          ZENODO_SANDBOX_TOKEN: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
+          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+          TARGET_ENV: ${{ inputs.target_env }}
+          AUTO_PUBLISH: ${{ inputs.auto_publish }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, glob, urllib.request
+
+          env = os.environ["TARGET_ENV"]
+          auto_pub = os.environ["AUTO_PUBLISH"].lower() == "true"
+          base_url = "https://sandbox.zenodo.org/api" if env == "sandbox" else "https://zenodo.org/api"
+          token = os.environ.get("ZENODO_SANDBOX_TOKEN") if env == "sandbox" else os.environ.get("ZENODO_TOKEN")
+
+          if not token:
+              print(f"ERROR: Token secret missing for environment '{env}'.", file=sys.stderr)
+              sys.exit(1)
+
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+          def api(method, url, data=None, raw_headers=None):
+              req = urllib.request.Request(url, data=data, headers=raw_headers or headers, method=method)
+              with urllib.request.urlopen(req) as resp:
+                  return json.loads(resp.read().decode("utf-8"))
+
+          dep = api("POST", f"{base_url}/deposit/depositions", data=b"{}")
+          dep_id = dep["id"]
+          bucket_url = dep["links"]["bucket"]
+          print(f"Created Zenodo {env} draft ID: {dep_id}")
+
+          zip_path = glob.glob("debian13-hardening-kvm-sandbox-*.zip")[0]
+          with open(zip_path, "rb") as fp:
+              payload = fp.read()
+          upload_headers = {
+              "Authorization": f"Bearer {token}",
+              "Content-Type": "application/octet-stream",
+          }
+          api("PUT", f"{bucket_url}/{os.path.basename(zip_path)}", data=payload, raw_headers=upload_headers)
+          print(f"Uploaded {zip_path}")
+
+          with open(".zenodo.json", "r", encoding="utf-8") as f:
+              meta = json.load(f)
+          api("PUT", f"{base_url}/deposit/depositions/{dep_id}", data=json.dumps({"metadata": meta}).encode("utf-8"))
+          print("Metadata updated successfully.")
+
+          if auto_pub:
+              pub = api("POST", f"{base_url}/deposit/depositions/{dep_id}/actions/publish")
+              print(f"PUBLISHED! DOI: {pub.get('doi')} | URL: {pub.get('links', {}).get('html')}")
+          else:
+              print(f"DRAFT READY FOR REVIEW: {dep.get('links', {}).get('html')}")
+          PY

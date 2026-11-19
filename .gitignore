@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.qcow2
+*.raw
+benchmarks/run_local/
+benchmarks/cis43_local/
